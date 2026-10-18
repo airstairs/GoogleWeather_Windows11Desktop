@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Weather</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0f172a;
+      font-family: system-ui, -apple-system, sans-serif;
+      color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Search Controls Bar */
+    .controls {
+      width: 100%;
+      max-width: 600px;
+      padding: 12px;
+      display: flex;
+      gap: 8px;
+      background: #1e293b;
+    }
+
+    .controls input {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .controls input:focus {
+      border-color: #38bdf8;
+    }
+
+    .controls button {
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: none;
+      background: #0284c7;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .controls button:hover {
+      background: #0369a1;
+    }
+
+    /* Fixed-height banner that crops top and bottom content */
+    .weather-banner {
+      position: relative;
+      width: 100%;
+      height: 430px; /* Cuts off extra search result pages below */
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    /* Target iframe shifted up to hide search header */
+    .weather-banner iframe {
+      position: absolute;
+      top: -150px; /* Cuts off Google top search bar */
+      left: 0;
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Controls Bar -->
+  <div class="controls">
+    <input type="text" id="location-input" placeholder="Enter city (e.g., Tallahassee, Tokyo)..." />
+    <button onclick="updateLocation()">Search</button>
+  </div>
+
+  <!-- Cropped Viewport -->
+  <div class="weather-banner">
+    <iframe 
+      id="google-weather-frame" 
+      src="" 
+      scrolling="no">
+    </iframe>
+  </div>
+
+  <script>
+    const iframe = document.getElementById('google-weather-frame');
+    const input = document.getElementById('location-input');
+
+    function loadWeatherQuery(query) {
+      // Load Google weather card into iframe ('igu=1' bypasses x-frame options)
+      iframe.src = `https://www.google.com/search?igu=1&q=${encodeURIComponent(query)}`;
+    }
+
+    function updateLocation() {
+      const city = input.value.trim();
+      if (city) {
+        const query = `weather ${city}`;
+        
+        // Save the location to localStorage
+        localStorage.setItem('last_weather_query', query);
+        
+        // Load into iframe
+        loadWeatherQuery(query);
+        
+        // Delete text entry in textfield
+        input.value = '';
+      }
+    }
+
+    // Trigger search on 'Enter' key press
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') updateLocation();
+    });
+
+    // On Page Refresh / Initial Load
+    window.addEventListener('DOMContentLoaded', () => {
+      // Clear input textfield on reload
+      input.value = '';
+
+      // Retrieve saved location or fallback to general 'weather'
+      const savedQuery = localStorage.getItem('last_weather_query') || 'weather';
+      loadWeatherQuery(savedQuery);
+    });
+  </script>
+</body>
+</html>
